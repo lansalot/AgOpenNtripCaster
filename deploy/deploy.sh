@@ -172,7 +172,7 @@ set +f  # Re-enable globbing
     max_attempts=30
     attempt=0
     while [ $attempt -lt $max_attempts ]; do
-        if curl -s http://localhost:5000/api/health &> /dev/null; then
+        if docker-compose exec -T backend curl -sf http://localhost:5000/api/health &> /dev/null; then
             print_success "Backend API is ready"
             break
         fi
@@ -196,8 +196,8 @@ set +f  # Re-enable globbing
     # Generate admin credentials
     print_header "Admin Account Creation"
 
-    ADMIN_PASSWORD="${INITIAL_ADMIN_PASSWORD}"
-    ADMIN_EMAIL="${INITIAL_ADMIN_EMAIL}"
+    ADMIN_PASSWORD="${ADMIN_PASSWORD}"
+    ADMIN_EMAIL="${ADMIN_EMAIL}"
 
     print_info "Creating initial admin account..."
     print_info "Email: $ADMIN_EMAIL"
@@ -261,8 +261,8 @@ set +f  # Re-enable globbing
     echo "║ ACCESS INFORMATION                                         ║"
     echo "╠════════════════════════════════════════════════════════════╣"
     echo "║ Frontend:  http://localhost                               ║"
-    echo "║ Backend:   http://localhost:5000                          ║"
-    echo "║ API Docs:  http://localhost:5000/swagger                  ║"
+    echo "║ Backend:   http://localhost/api (via nginx)               ║"
+    echo "║ Health:    http://localhost/api/health                    ║"
     echo "║ NTRIP:     localhost:2101                                 ║"
     echo "╠════════════════════════════════════════════════════════════╣"
     echo "║ ADMIN ACCOUNT                                              ║"
@@ -296,7 +296,7 @@ IMPORTANT:
 
 Access the application at:
 - Frontend: http://localhost
-- Backend API: http://localhost:5000
+- Backend API: http://localhost/api (via nginx)
 EOF
 
     print_success "Credentials saved to: $CREDS_FILE"
