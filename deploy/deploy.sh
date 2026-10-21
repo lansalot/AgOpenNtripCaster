@@ -87,7 +87,15 @@ main() {
     print_success "Found .env file: $ENV_FILE"
 
     # Load environment variables
-    export $(cat "$SCRIPT_DIR/$ENV_FILE" | grep -v '^#' | grep -v '^$' | xargs)
+    set -f  # Disable globbing (prevents * from expanding to files)
+while IFS= read -r line || [ -n "$line" ]; do
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    export "$line"
+done < "$SCRIPT_DIR/$ENV_FILE"
+set +f  # Re-enable globbing
+    # unsafe! interprets the backup_schedule as independent parameters
+    # export $(cat "$SCRIPT_DIR/$ENV_FILE" | grep -v '^#' | grep -v '^$' | xargs)
 
     # Validate required variables
     print_info "Validating environment variables..."
