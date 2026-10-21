@@ -99,7 +99,7 @@ set +f  # Re-enable globbing
 
     # Validate required variables
     print_info "Validating environment variables..."
-    required_vars=("DB_HOST" "DB_NAME" "DB_USER" "DB_PASSWORD" "JWT_SECRET_KEY" "INITIAL_ADMIN_EMAIL" "INITIAL_ADMIN_PASSWORD")
+    required_vars=("DB_HOST" "DB_NAME" "DB_USER" "DB_PASSWORD" "JWT_SECRET" "ADMIN_EMAIL" "ADMIN_PASSWORD")
     for var in "${required_vars[@]}"; do
         if [ -z "${!var}" ]; then
             print_error "Missing required variable: $var"
@@ -123,17 +123,18 @@ set +f  # Re-enable globbing
     fi
     print_success "Docker Compose is installed"
 
+    cd "$PROJECT_ROOT/deploy"
+    echo "Changed to $PROJECT_ROOT/deploy"
     # Pull images if requested
     if [ "$PULL_IMAGES" = true ]; then
         print_info "Pulling latest Docker images..."
-        cd "$PROJECT_ROOT"
+    pwd
         docker-compose pull
         print_success "Docker images pulled"
     fi
 
     # Build images
     print_info "Building Docker images..."
-    cd "$PROJECT_ROOT"
     docker-compose build --no-cache
     print_success "Docker images built"
 
@@ -152,7 +153,7 @@ set +f  # Re-enable globbing
     max_attempts=30
     attempt=0
     while [ $attempt -lt $max_attempts ]; do
-        if cd "$PROJECT_ROOT" && docker-compose exec -T postgres pg_isready -U "$DB_USER" -d "$DB_NAME" &> /dev/null; then
+        if docker-compose exec -T postgres pg_isready -U "$DB_USER" -d "$DB_NAME" &> /dev/null; then
             print_success "Database is ready"
             break
         fi
@@ -186,7 +187,7 @@ set +f  # Re-enable globbing
 
     # Run database migrations
     print_info "Running database migrations..."
-    cd "$PROJECT_ROOT" && docker-compose exec -T backend dotnet ef database update || {
+    docker-compose exec -T backend dotnet ef database update || {
         print_error "Database migration failed"
         exit 1
     }
