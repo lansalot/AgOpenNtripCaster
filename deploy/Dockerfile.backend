@@ -11,6 +11,10 @@ COPY AgOpenNtripCaster.Server ./AgOpenNtripCaster.Server
 WORKDIR /src/AgOpenNtripCaster.Server
 RUN dotnet restore
 
+# add dotnet ef
+#
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:~/.dotnet/tools"
 # Build
 RUN dotnet build -c Release -o /app/build
 
